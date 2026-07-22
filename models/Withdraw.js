@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const withdrawSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -36,6 +36,17 @@ const withdrawSchema = new mongoose.Schema(
       type: String,
       enum: ["Pending", "Berhasil", "Ditolak"],
       default: "Pending",
+    },
+
+    note: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    processedAt: {
+      type: Date,
+      default: null,
     },
   },
   {

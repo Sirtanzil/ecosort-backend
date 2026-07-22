@@ -4,6 +4,7 @@ const Transaction = require("../models/Transaction");
 
 // ===========================
 // CREATE WITHDRAW
+// POST /api/withdraw
 // ===========================
 const createWithdraw = async (req, res) => {
   try {
@@ -14,7 +15,20 @@ const createWithdraw = async (req, res) => {
       accountName,
     } = req.body;
 
-    // Cari user yang sedang login
+    // Validasi input
+    if (
+      !amount ||
+      !bankName ||
+      !accountNumber ||
+      !accountName
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Semua field wajib diisi",
+      });
+    }
+
+    // Cari user login
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -25,10 +39,10 @@ const createWithdraw = async (req, res) => {
     }
 
     // Validasi nominal
-    if (amount <= 0) {
+    if (amount < 1000) {
       return res.status(400).json({
         success: false,
-        message: "Nominal withdraw harus lebih dari 0",
+        message: "Minimal withdraw Rp1.000",
       });
     }
 
@@ -40,28 +54,33 @@ const createWithdraw = async (req, res) => {
       });
     }
 
-    // Kurangi saldo user
+    // Kurangi saldo
     user.saldo -= amount;
     user.totalTransaction += 1;
 
     await user.save();
 
-    // Simpan data withdraw
+    // Simpan withdraw
     const withdraw = await Withdraw.create({
-      user: user._id,
+      userId: user._id,
       amount,
       bankName,
       accountNumber,
       accountName,
       status: "Pending",
+      note: "",
+      processedAt: null,
     });
 
     // Simpan transaksi
     await Transaction.create({
-      user: user._id,
+      userId: user._id,
+      pickupId: null,
       type: "withdraw",
       amount,
       description: `Withdraw ke ${bankName}`,
+      status: "Pending",
+      balanceAfter: user.saldo,
     });
 
     res.status(201).json({
@@ -82,12 +101,13 @@ const createWithdraw = async (req, res) => {
 
 // ===========================
 // GET MY WITHDRAWS
+// GET /api/withdraw
 // ===========================
 const getMyWithdraws = async (req, res) => {
   try {
 
     const withdraws = await Withdraw.find({
-      user: req.user.id,
+      userId: req.user.id,
     }).sort({
       createdAt: -1,
     });
@@ -110,13 +130,14 @@ const getMyWithdraws = async (req, res) => {
 
 // ===========================
 // GET WITHDRAW DETAIL
+// GET /api/withdraw/:id
 // ===========================
 const getWithdrawDetail = async (req, res) => {
   try {
 
     const withdraw = await Withdraw.findOne({
       _id: req.params.id,
-      user: req.user.id,
+      userId: req.user.id,
     });
 
     if (!withdraw) {
