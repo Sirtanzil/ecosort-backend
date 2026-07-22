@@ -99,6 +99,9 @@ const getPickupDetail = async (req, res) => {
 // ======================================
 // UPDATE PICKUP
 // ======================================
+// ======================================
+// UPDATE PICKUP
+// ======================================
 const updatePickup = async (req, res) => {
   try {
     const pickup = await Pickup.findOne({
@@ -129,16 +132,33 @@ const updatePickup = async (req, res) => {
       note,
     } = req.body;
 
-    pickup.wasteType = wasteType;
-    pickup.estimatedWeight = estimatedWeight;
-    pickup.address = address;
-    pickup.pickupDate = pickupDate;
-    pickup.pickupTime = pickupTime;
-    pickup.note = note;
+    if (wasteType !== undefined) {
+      pickup.wasteType = wasteType;
+    }
+
+    if (estimatedWeight !== undefined) {
+      pickup.estimatedWeight = estimatedWeight;
+    }
+
+    if (address !== undefined) {
+      pickup.address = address;
+    }
+
+    if (pickupDate !== undefined) {
+      pickup.pickupDate = pickupDate;
+    }
+
+    if (pickupTime !== undefined) {
+      pickup.pickupTime = pickupTime;
+    }
+
+    if (note !== undefined) {
+      pickup.note = note;
+    }
 
     await pickup.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Pickup berhasil diperbarui",
       data: pickup,
@@ -146,7 +166,7 @@ const updatePickup = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
