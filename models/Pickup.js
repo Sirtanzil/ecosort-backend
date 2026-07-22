@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const pickupSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -14,7 +14,7 @@ const pickupSchema = new mongoose.Schema(
       trim: true,
     },
 
-    weight: {
+    estimatedWeight: {
       type: Number,
       required: true,
       min: 1,
@@ -31,9 +31,16 @@ const pickupSchema = new mongoose.Schema(
       required: true,
     },
 
+    pickupTime: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     note: {
       type: String,
       default: "",
+      trim: true,
     },
 
     status: {

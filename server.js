@@ -14,12 +14,20 @@ const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
+// ==============================
+// Connect Database
+// ==============================
 connectDB();
 
+// ==============================
+// Middleware
+// ==============================
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// ==============================
+// API Routes
+// ==============================
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/pickups", pickupRoutes);
@@ -28,14 +36,19 @@ app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin", adminRoutes);
 
+// ==============================
 // Root Endpoint
+// ==============================
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
     message: "EcoSort Backend Running 🚀",
   });
 });
 
+// ==============================
+// Start Server
+// ==============================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
