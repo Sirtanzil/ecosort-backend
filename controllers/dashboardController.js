@@ -3,6 +3,10 @@ const Transaction = require("../models/Transaction");
 const Withdraw = require("../models/Withdraw");
 const Pickup = require("../models/Pickup");
 
+// ===========================
+// GET DASHBOARD
+// GET /api/dashboard
+// ===========================
 const getDashboard = async (req, res) => {
   try {
     // Ambil data user
@@ -17,22 +21,22 @@ const getDashboard = async (req, res) => {
 
     // Hitung total pickup
     const totalPickup = await Pickup.countDocuments({
-      user: req.user.id,
+      userId: req.user.id,
     });
 
     // Hitung total withdraw
     const totalWithdraw = await Withdraw.countDocuments({
-      user: req.user.id,
+      userId: req.user.id,
     });
 
     // Hitung total transaksi
     const totalTransaction = await Transaction.countDocuments({
-      user: req.user.id,
+      userId: req.user.id,
     });
 
     // Ambil 5 transaksi terbaru
     const recentTransactions = await Transaction.find({
-      user: req.user.id,
+      userId: req.user.id,
     })
       .sort({ createdAt: -1 })
       .limit(5);
@@ -53,7 +57,6 @@ const getDashboard = async (req, res) => {
         recentTransactions,
       },
     });
-
   } catch (error) {
     console.error(error);
 
