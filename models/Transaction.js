@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    pickup: {
+    pickupId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pickup",
       default: null,
@@ -30,6 +30,18 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["Pending", "Approved", "Rejected", "Selesai"],
+      default: "Selesai",
+    },
+
+    balanceAfter: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   {

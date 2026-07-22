@@ -5,20 +5,27 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 
 const {
-  getMyTransactions,
-  getTransactionDetail,
+  createTransaction,
+  getTransactions,
+  getTransactionById,
 } = require("../controllers/transactionController");
+
+// ===========================
+// CREATE TRANSACTION
+// POST /api/transactions
+// ===========================
+router.post("/", authMiddleware, createTransaction);
 
 // ===========================
 // GET MY TRANSACTIONS
 // GET /api/transactions
 // ===========================
-router.get("/", authMiddleware, getMyTransactions);
+router.get("/", authMiddleware, getTransactions);
 
 // ===========================
 // GET TRANSACTION DETAIL
 // GET /api/transactions/:id
 // ===========================
-router.get("/:id", authMiddleware, getTransactionDetail);
+router.get("/:id", authMiddleware, getTransactionById);
 
 module.exports = router;
