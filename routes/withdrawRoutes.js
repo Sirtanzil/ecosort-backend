@@ -10,22 +10,34 @@ const {
   getWithdrawDetail,
 } = require("../controllers/withdrawController");
 
-// ===========================
+// ======================================
 // CREATE WITHDRAW
 // POST /api/withdraw
-// ===========================
-router.post("/", authMiddleware, createWithdraw);
+// ======================================
+router.post(
+  "/",
+  authMiddleware,
+  createWithdraw
+);
 
-// ===========================
+// ======================================
 // GET MY WITHDRAWS
 // GET /api/withdraw
-// ===========================
-router.get("/", authMiddleware, getMyWithdraws);
+// ======================================
+router.get(
+  "/",
+  authMiddleware,
+  getMyWithdraws
+);
 
-// ===========================
+// ======================================
 // GET WITHDRAW DETAIL
 // GET /api/withdraw/:id
-// ===========================
-router.get("/:id", authMiddleware, getWithdrawDetail);
+// ======================================
+router.get(
+  "/:id",
+  authMiddleware,
+  getWithdrawDetail
+);
 
 module.exports = router;

@@ -10,7 +10,6 @@ const {
   getPickupDetail,
   updatePickup,
   deletePickup,
-  completePickup,
 } = require("../controllers/pickupController");
 
 // ======================================
@@ -42,11 +41,5 @@ router.put("/:id", authMiddleware, updatePickup);
 // DELETE /api/pickups/:id
 // ======================================
 router.delete("/:id", authMiddleware, deletePickup);
-
-// ======================================
-// COMPLETE PICKUP
-// PUT /api/pickups/:id/complete
-// ======================================
-router.put("/:id/complete", authMiddleware, completePickup);
 
 module.exports = router;

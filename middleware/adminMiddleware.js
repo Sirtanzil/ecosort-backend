@@ -2,10 +2,8 @@ const User = require("../models/User");
 
 const adminMiddleware = async (req, res, next) => {
   try {
-    // Ambil data user dari JWT
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select("role");
 
-    // Cek apakah user ada
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -13,7 +11,6 @@ const adminMiddleware = async (req, res, next) => {
       });
     }
 
-    // Cek role
     if (user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -23,7 +20,7 @@ const adminMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return res.status(500).json({
       success: false,

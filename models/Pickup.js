@@ -14,10 +14,32 @@ const pickupSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Berat perkiraan dari user
     estimatedWeight: {
       type: Number,
       required: true,
       min: 1,
+    },
+
+    // Berat hasil penimbangan admin
+    actualWeight: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // Harga per kilogram
+    pricePerKg: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // Total hasil penjualan
+    totalPrice: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     address: {

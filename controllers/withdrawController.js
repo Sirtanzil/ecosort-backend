@@ -1,6 +1,5 @@
 const User = require("../models/User");
 const Withdraw = require("../models/Withdraw");
-const Transaction = require("../models/Transaction");
 
 // ===========================
 // CREATE WITHDRAW
@@ -15,7 +14,6 @@ const createWithdraw = async (req, res) => {
       accountName,
     } = req.body;
 
-    // Validasi input
     if (
       !amount ||
       !bankName ||
@@ -28,7 +26,6 @@ const createWithdraw = async (req, res) => {
       });
     }
 
-    // Cari user login
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -38,7 +35,6 @@ const createWithdraw = async (req, res) => {
       });
     }
 
-    // Validasi nominal
     if (amount < 1000) {
       return res.status(400).json({
         success: false,
@@ -46,7 +42,6 @@ const createWithdraw = async (req, res) => {
       });
     }
 
-    // Cek saldo
     if (user.saldo < amount) {
       return res.status(400).json({
         success: false,
@@ -54,13 +49,19 @@ const createWithdraw = async (req, res) => {
       });
     }
 
-    // Kurangi saldo
-    user.saldo -= amount;
-    user.totalTransaction += 1;
+    // Cek apakah masih ada withdraw yang pending
+    const pendingWithdraw = await Withdraw.findOne({
+      userId: user._id,
+      status: "Pending",
+    });
 
-    await user.save();
+    if (pendingWithdraw) {
+      return res.status(400).json({
+        success: false,
+        message: "Masih ada permintaan withdraw yang sedang diproses",
+      });
+    }
 
-    // Simpan withdraw
     const withdraw = await Withdraw.create({
       userId: user._id,
       amount,
@@ -72,20 +73,9 @@ const createWithdraw = async (req, res) => {
       processedAt: null,
     });
 
-    // Simpan transaksi
-    await Transaction.create({
-      userId: user._id,
-      pickupId: null,
-      type: "withdraw",
-      amount,
-      description: `Withdraw ke ${bankName}`,
-      status: "Pending",
-      balanceAfter: user.saldo,
-    });
-
     res.status(201).json({
       success: true,
-      message: "Permintaan withdraw berhasil dibuat",
+      message: "Permintaan withdraw berhasil dikirim",
       data: withdraw,
     });
 
@@ -105,7 +95,6 @@ const createWithdraw = async (req, res) => {
 // ===========================
 const getMyWithdraws = async (req, res) => {
   try {
-
     const withdraws = await Withdraw.find({
       userId: req.user.id,
     }).sort({
@@ -134,7 +123,6 @@ const getMyWithdraws = async (req, res) => {
 // ===========================
 const getWithdrawDetail = async (req, res) => {
   try {
-
     const withdraw = await Withdraw.findOne({
       _id: req.params.id,
       userId: req.user.id,

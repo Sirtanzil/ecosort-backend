@@ -1,15 +1,9 @@
 const Pickup = require("../models/Pickup");
-const User = require("../models/User");
-const Transaction = require("../models/Transaction");
 
 // ======================================
 // CREATE PICKUP
 // ======================================
 const createPickup = async (req, res) => {
-  console.log("========== CREATE PICKUP ==========");
-  console.log("USER :", req.user);
-  console.log("BODY :", req.body);
-
   try {
     const {
       wasteType,
@@ -36,13 +30,11 @@ const createPickup = async (req, res) => {
       data: pickup,
     });
   } catch (error) {
-    console.error("========== CREATE PICKUP ERROR ==========");
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
-      stack: error.stack,
+      message: "Server Error",
     });
   }
 };
@@ -68,7 +60,7 @@ const getMyPickups = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Server Error",
     });
   }
 };
@@ -99,7 +91,7 @@ const getPickupDetail = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Server Error",
     });
   }
 };
@@ -156,7 +148,7 @@ const updatePickup = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Server Error",
     });
   }
 };
@@ -196,74 +188,7 @@ const deletePickup = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message,
-    });
-  }
-};
-
-// ======================================
-// COMPLETE PICKUP
-// ======================================
-const completePickup = async (req, res) => {
-  try {
-    const pickup = await Pickup.findById(req.params.id);
-
-    if (!pickup) {
-      return res.status(404).json({
-        success: false,
-        message: "Pickup tidak ditemukan",
-      });
-    }
-
-    if (pickup.status === "Selesai") {
-      return res.status(400).json({
-        success: false,
-        message: "Pickup sudah diselesaikan",
-      });
-    }
-
-    pickup.status = "Selesai";
-    await pickup.save();
-
-    const user = await User.findById(pickup.userId);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User tidak ditemukan",
-      });
-    }
-
-    const pricePerKg = 5000;
-    const totalAmount = pickup.estimatedWeight * pricePerKg;
-
-    user.saldo += totalAmount;
-    user.totalPickup += 1;
-    user.totalTransaction += 1;
-    user.totalWaste += pickup.estimatedWeight;
-
-    await user.save();
-
-    await Transaction.create({
-      userId: user._id,
-      pickupId: pickup._id,
-      type: "pickup",
-      amount: totalAmount,
-      description: `Hasil penjualan sampah ${pickup.wasteType}`,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Pickup berhasil diselesaikan",
-      saldoMasuk: totalAmount,
-      data: pickup,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
+      message: "Server Error",
     });
   }
 };
@@ -274,5 +199,4 @@ module.exports = {
   getPickupDetail,
   updatePickup,
   deletePickup,
-  completePickup,
 };

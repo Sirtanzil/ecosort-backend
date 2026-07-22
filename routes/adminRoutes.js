@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -15,7 +16,7 @@ const {
 } = require("../controllers/adminController");
 
 // ======================================
-// DASHBOARD ADMIN
+// ADMIN DASHBOARD
 // ======================================
 router.get(
   "/dashboard",
@@ -44,6 +45,12 @@ router.get(
   getAllPickups
 );
 
+// Complete Pickup
+// Body:
+// {
+//   "actualWeight": 4.5,
+//   "pricePerKg": 3000
+// }
 router.put(
   "/pickups/:id/complete",
   authMiddleware,
@@ -61,6 +68,7 @@ router.get(
   getAllWithdraws
 );
 
+// Approve Withdraw
 router.put(
   "/withdraws/:id/approve",
   authMiddleware,
@@ -68,6 +76,7 @@ router.put(
   approveWithdraw
 );
 
+// Reject Withdraw
 router.put(
   "/withdraws/:id/reject",
   authMiddleware,
