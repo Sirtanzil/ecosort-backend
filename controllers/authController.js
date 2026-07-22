@@ -9,7 +9,6 @@ const register = async (req, res) => {
   try {
     const { name, email, password, phone, address } = req.body;
 
-    // Validasi
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -17,7 +16,6 @@ const register = async (req, res) => {
       });
     }
 
-    // Cek email
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -27,10 +25,8 @@ const register = async (req, res) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Simpan user
     const user = await User.create({
       name,
       email,
@@ -66,9 +62,11 @@ const register = async (req, res) => {
 // =======================
 const login = async (req, res) => {
   try {
+    console.log("========== LOGIN ==========");
+    console.log("BODY:", req.body);
+
     const { email, password } = req.body;
 
-    // Validasi
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -76,8 +74,9 @@ const login = async (req, res) => {
       });
     }
 
-    // Cari user
     const user = await User.findOne({ email });
+
+    console.log("USER:", user ? user.email : "TIDAK DITEMUKAN");
 
     if (!user) {
       return res.status(404).json({
@@ -86,8 +85,9 @@ const login = async (req, res) => {
       });
     }
 
-    // Cek password
     const isMatch = await bcrypt.compare(password, user.password);
+
+    console.log("PASSWORD MATCH:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -96,7 +96,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate JWT
     const token = jwt.sign(
       {
         id: user._id,
@@ -106,6 +105,8 @@ const login = async (req, res) => {
         expiresIn: "7d",
       }
     );
+
+    console.log("LOGIN BERHASIL");
 
     res.status(200).json({
       success: true,
@@ -130,7 +131,36 @@ const login = async (req, res) => {
   }
 };
 
+// =======================
+// GET PROFILE
+// =======================
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User tidak ditemukan",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
+  getProfile,
 };

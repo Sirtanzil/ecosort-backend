@@ -37,19 +37,24 @@ const userSchema = new mongoose.Schema(
     },
 
     saldo: {
-      type: Number,
-      default: 0,
-    },
+  type: Number,
+  default: 0,
+},
 
-    totalPickup: {
-      type: Number,
-      default: 0,
-    },
+totalPickup: {
+  type: Number,
+  default: 0,
+},
 
-    totalTransaction: {
-      type: Number,
-      default: 0,
-    },
+totalWaste: {
+  type: Number,
+  default: 0,
+},
+
+totalTransaction: {
+  type: Number,
+  default: 0,
+},
   },
   {
     timestamps: true,
