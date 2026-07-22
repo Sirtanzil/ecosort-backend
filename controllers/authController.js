@@ -16,7 +16,9 @@ const register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      email,
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -31,8 +33,8 @@ const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      phone,
-      address,
+      phone: phone || "-",
+      address: address || "-",
     });
 
     res.status(201).json({
@@ -45,6 +47,9 @@ const register = async (req, res) => {
         phone: user.phone,
         address: user.address,
         saldo: user.saldo,
+        totalPickup: user.totalPickup,
+        totalTransaction: user.totalTransaction,
+        totalWaste: user.totalWaste,
       },
     });
   } catch (error) {
@@ -63,7 +68,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     console.log("========== LOGIN ==========");
-    console.log("BODY:", req.body);
+    console.log("BODY :", req.body);
 
     const { email, password } = req.body;
 
@@ -74,9 +79,14 @@ const login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email,
+    });
 
-    console.log("USER:", user ? user.email : "TIDAK DITEMUKAN");
+    console.log(
+      "USER :",
+      user ? user.email : "TIDAK DITEMUKAN"
+    );
 
     if (!user) {
       return res.status(404).json({
@@ -85,9 +95,12 @@ const login = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-    console.log("PASSWORD MATCH:", isMatch);
+    console.log("PASSWORD MATCH :", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -119,6 +132,9 @@ const login = async (req, res) => {
         phone: user.phone,
         address: user.address,
         saldo: user.saldo,
+        totalPickup: user.totalPickup,
+        totalTransaction: user.totalTransaction,
+        totalWaste: user.totalWaste,
       },
     });
   } catch (error) {
@@ -159,8 +175,122 @@ const getProfile = async (req, res) => {
   }
 };
 
+// =======================
+// UPDATE PROFILE
+// =======================
+const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, address } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User tidak ditemukan",
+      });
+    }
+
+    user.name = name ?? user.name;
+    user.phone = phone ?? user.phone;
+    user.address = address ?? user.address;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profil berhasil diperbarui",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        saldo: user.saldo,
+        totalPickup: user.totalPickup,
+        totalTransaction: user.totalTransaction,
+        totalWaste: user.totalWaste,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+// =======================
+// CHANGE PASSWORD
+// =======================
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Password lama dan password baru wajib diisi",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password baru minimal 8 karakter",
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User tidak ditemukan",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Password lama salah",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      10
+    );
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password berhasil diubah",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   getProfile,
+  updateProfile,
+  changePassword,
 };
