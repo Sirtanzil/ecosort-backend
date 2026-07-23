@@ -1,6 +1,59 @@
 const Transaction = require("../models/Transaction");
 
 // ===============================
+// CREATE TRANSACTION
+// POST /api/transactions
+// ===============================
+const createTransaction = async (req, res) => {
+  try {
+    const {
+      wasteType,
+      weight,
+      pricePerKg,
+    } = req.body;
+
+    // Validasi
+    if (
+      !wasteType ||
+      !weight ||
+      !pricePerKg
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Data transaksi belum lengkap",
+      });
+    }
+
+    const amount =
+      Number(weight) * Number(pricePerKg);
+
+    const transaction =
+      await Transaction.create({
+        userId: req.user.id,
+        type: "pickup",
+        amount: amount,
+        description: `${wasteType} (${weight} Kg)`,
+        status: "Pending",
+        balanceAfter: 0,
+      });
+
+    return res.status(201).json({
+      success: true,
+      message: "Transaksi berhasil dibuat",
+      data: transaction,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+// ===============================
 // GET MY TRANSACTIONS
 // GET /api/transactions
 // ===============================
@@ -48,7 +101,7 @@ const getTransactionById = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: transaction,
     });
@@ -56,7 +109,7 @@ const getTransactionById = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
@@ -64,6 +117,7 @@ const getTransactionById = async (req, res) => {
 };
 
 module.exports = {
+  createTransaction,
   getTransactions,
   getTransactionById,
 };
